@@ -1,0 +1,44 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "date": 1526027630932,
+      "title": "My first post",
+      "author": "Dimitar Slavchev",
+      "text": "Hello world !",
+      "tags": "hello",
+      "imgUrl": "https://avatars.githubusercontent.com/Hackfmi",
+      "status": "inactive"
+    },
+    {
+      "id": 2,
+      "title": "My second post",
+      "author": "Dimitar Slavchev",
+      "text": "Let's get it started",
+      "tags": "#blogPosting",
+      "imgUrl": "https://avatars.githubusercontent.com/Hackfmi4",
+      "status": "active",
+      "date": 1526013020358
+    },
+    {
+      "id": 3,
+      "title": "My third post",
+      "author": "AronChupa ",
+      "text": "I'm an Albatraoz ",
+      "tags": "Albatraoz",
+      "imgUrl": "https://youtu.be/Bznxx12Ptl0",
+      "status": "active",
+      "date": 1524023120358
+    },
+    {
+      "id": 4,
+      "title": "My forth post",
+      "author": "Dimitar Slavchev",
+      "text": "welcome to the party",
+      "tags": "party, all night, free beer",
+      "imgUrl": "https://avatars.githubusercontent.com/Hackfmi4",
+      "status": "active",
+      "date": 1525923120358
+    }
+  ]
+}

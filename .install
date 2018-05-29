@@ -1,0 +1,274 @@
+@echo off
+
+:: ######################################################
+:: ## Heredoc syntax:                                  ##
+:: ## call :heredoc uniqueIDX [>outfile] && goto label ##
+:: ## contents                                         ##
+:: ## contents                                         ##
+:: ## contents                                         ##
+:: ## etc.                                             ##
+:: ## :label                                           ##
+:: ##                                                  ##
+:: ## Notes:                                           ##
+:: ## Variables to be evaluated within the heredoc     ##
+:: ## should be called in the delayed expansion style  ##
+:: ## (!var! rather than %var%, for instance).         ##
+:: ##                                                  ##
+:: ## Literal exclamation marks (!) and carats (^)     ##
+:: ## must be escaped with a carat (^).                ##
+:: ######################################################
+
+set appName=react-app
+set author=ICB
+set description=Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+call :heredoc package > ./package.json && goto command0
+{
+  "name": "!appName!",
+  "version": "1.0.0",
+  "description": "!description!",
+  "main": "index.js",
+  "scripts": {
+	"start": "webpack-dev-server"
+  },
+  "author": "!author!",
+  "license": "MIT"
+}
+:command0
+
+echo install webpack  webpack-dev-server
+call npm install --save-dev webpack  webpack-dev-server
+
+echo install awesome-typescript-loader awesome-typescript-loader url-loader file-loader html-webpack-plugin
+call npm install --save-dev awesome-typescript-loader url-loader file-loader html-webpack-plugin
+
+echo install style-loader sass-loader node-sass precss postcss-loader autoprefixer
+call npm install css-loader style-loader sass-loader node-sass precss postcss-loader autoprefixer --save-dev
+
+echo install typescript
+call npm install typescript --save-dev
+
+call :heredoc tsconfig > ./tsconfig.json && goto command1
+{
+ "compilerOptions": {
+   "target": "es6",
+   "module": "es6",
+   "moduleResolution": "node",
+   "declaration": false,
+   "noImplicitAny": false,
+   "sourceMap": true,
+   "jsx": "react",
+   "noLib": false,
+   "suppressImplicitAnyIndexErrors": true
+ },
+ "compileOnSave": false,
+ "exclude": [
+   "node_modules"
+ ]
+}
+:command1
+
+echo install babel-core babel-preset-env
+call npm install babel-core babel-preset-env --save-dev
+
+call :heredoc babel > ./.babelrc && goto command2
+{
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ]
+  ]
+}
+:command2
+
+echo install bootstrap jquery
+call npm install bootstrap jquery --save
+
+if not exist src\ mkdir src
+
+if not exist dist\ mkdir dist
+
+if exist src\ts\ (
+	echo files already exist
+) else (
+	mkdir src\images src\scss 
+	mkdir src\ts src\ts\components src\ts\enums src\ts\interfaces src\ts\models 
+	echo created..
+) 
+
+call :heredoc app > ./src/ts/app.tsx && goto command3
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+import { HelloComponent } from './hello';
+
+ ReactDOM.render(
+	   <HelloComponent/>,
+	   document.getElementById('root')
+   );
+:command3
+
+call :heredoc style > ./src/scss/styles.scss && goto command4
+body {
+}
+:command4
+
+call :heredoc index > ./src/index.html && goto command5
+<^!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Simple React and Typescript App</h1>
+	<div id="root"></div>
+</body>
+</html>
+:command5
+
+call :heredoc webpackConfig > ./webpack.config.js && goto command6
+var path = require('path');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var webpack = require('webpack');
+
+const srcFolder = 'src';
+const distFolder = 'dist';
+
+module.exports = {
+  context: path.join(__dirname, srcFolder),
+  resolve: {
+    alias: {
+      root: path.join(__dirname, srcFolder, 'ts')
+    },
+    extensions: ['.js', '.ts', '.tsx', '.json']
+  },
+  entry: {
+    app: './ts/app.tsx',
+    appStyles: './scss/styles.scss',
+    vendor: [
+      'react',
+      'react-dom',
+    ],
+    vendorStyles: [
+     '../node_modules/bootstrap/scss/bootstrap.scss',
+    ],
+  },
+  output: {
+    path: path.join(__dirname, distFolder, 'js'),
+    filename: '[name].js',
+    //publicPath: '/js'
+  },
+  module: {
+    rules: [{
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        loader: 'awesome-typescript-loader',
+        options: {
+          useBabel: true,
+        },
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.scss$/,
+        exclude: [path.join(__dirname, srcFolder, 'ts')],
+        use: [
+          { loader: 'style-loader' }, // inject CSS to page
+          { loader: 'css-loader' }, // translates CSS into CommonJS modules
+          { 
+            loader: 'postcss-loader', // Run post css actions
+            options: {
+            plugins: function () { // post css plugins, can be exported to postcss.config.js
+              return [
+                require('precss'),
+                require('autoprefixer')
+              ];
+            }
+          },
+          },
+          { loader: 'sass-loader' }, // compiles Sass to CSS
+        ]
+      },
+      // Loading glyphicons => https://github.com/gowravshekar/bootstrap-webpack
+      // Using here url-loader and file-loader
+      {
+        test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'url-loader?limit=10000&mimetype=application/font-woff'
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'url-loader?limit=10000&mimetype=application/octet-stream'
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'file-loader'
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      },
+    ],
+  },
+  // For development https://webpack.js.org/configuration/devtool/#for-development
+  devtool: 'inline-source-map',
+  devServer: {
+    port: 8089,
+    noInfo: true,
+  },
+  plugins: [
+    //Generate index.html in /dist => https://github.com/ampedandwired/html-webpack-plugin
+    new HtmlWebpackPlugin({
+      filename: 'index.html', //Name of file in ./dist/
+      template: 'index.html', //Name of template in ./src
+      hash: true,
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      names: ['vendor', 'manifest'],
+    }),
+  ],
+};
+:command6
+
+echo install react react-dom
+call npm install react react-dom --save
+
+echo install @types/react @types/react-dom
+call npm install @types/react @types/react-dom --save-dev
+
+call :heredoc hello > ./src/ts/hello.tsx && goto command7
+import * as React from 'react';
+
+export const HelloComponent = () => {
+  return (
+    <h2>Hello component !</h2>
+  );
+}
+:command7
+
+
+goto :EOF
+:heredoc <uniqueIDX>
+setlocal enabledelayedexpansion
+set go=
+for /f "delims=" %%A in ('findstr /n "^" "%~f0"') do (
+    set "line=%%A" && set "line=!line:*:=!"
+    if defined go (if #!line:~1!==#!go::=! (goto :EOF) else echo(!line!)
+    if "!line:~0,13!"=="call :heredoc" (
+        for /f "tokens=3 delims=>^ " %%i in ("!line!") do (
+            if #%%i==#%1 (
+                for /f "tokens=2 delims=&" %%I in ("!line!") do (
+                    for /f "tokens=2" %%x in ("%%I") do set "go=%%x"
+                )
+            )
+        )
+    )
+)
+goto :EOF
