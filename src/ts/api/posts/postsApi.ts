@@ -1,11 +1,10 @@
-// import { PostEntity } from "../../models";
-const PostEntity = mongoose.model('post');
+import { PostEntity } from "../../models";
 
 const baseUrl = 'http://localhost:8080';
 const getPostsUri = () => `${baseUrl}/api/posts`;
 const getPostUri = (id: number) => `${baseUrl}/api/posts/${id}`;
 
-const mapToPosts = (posts: any[]): object[] => {
+const mapToPosts = (posts: any[]): PostEntity[] => {
     return posts.map(mapToPost);
 };
 
@@ -22,7 +21,7 @@ const mapToPost = (e)  => {
     };
 };
 
-const fetchPosts = (): Promise<any[]> => {
+const fetchPosts = (): Promise<PostEntity[]> => {
     return fetch(getPostsUri())
         .then((response) => {
             if (!response.ok) {
@@ -46,7 +45,7 @@ const deletePost = (id: number): Promise<void> => {
         });
 };
 
-const savePost = (post): Promise<any> => {
+const savePost = (post: PostEntity): Promise<any> => {
     let url: string;
     let method: string;
 

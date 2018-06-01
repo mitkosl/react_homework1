@@ -99,7 +99,7 @@ module.exports = {
     // proxy requests to the JSON server REST service
     proxy: {
       '/api/*': {
-        target: 'http://localhost:3000'
+        target: 'http://localhost:9000'
       }
     }
   },

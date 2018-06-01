@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const mongodb = require('mongodb');
 const replaceId = require('./helpers').replaceId;
 const error = require('./helpers').sendErrorResponse;
 const indicative = require('indicative');
+const PostEntity = require('../../ts/models/blogPosts');
+
 
 
 // GET all posts  
 router.get('/', function (req, res) {
-    const db = req.app.locals.db;
-    db.collection('posts').find().toArray(
+    mongoose.collection('posts').find().toArray(
         function (err, docs) {
             if (err) throw err;
             res.json(docs.map((post) => {
@@ -23,13 +23,12 @@ router.get('/', function (req, res) {
 
 // GET posts list 
 router.get('/:postId', function (req, res) {
-    const db = req.app.locals.db;
     const params = req.params;
     indicative.validate(params, { postId: 'required|regex:^[0-9a-f]{24}$' })
         .then(() => {
-            db.collection('posts', function (err, all_posts) {
+            mongoose.collection('posts', function (err, all_posts) {
                 if (err) throw err;
-                all_posts.findOne({ _id: new mongodb.ObjectID(params.postId) },
+                all_posts.findOne({ _id: new mongoose.Schema.ObjectID(params.postId) },
                     (err, post) => {
                         if (err) throw err;
                         if (post === null) {
@@ -48,8 +47,9 @@ router.get('/:postId', function (req, res) {
 
 // Create new post
 router.post('/', function (req, res) {
-    const db = req.app.locals.db;
     const post = req.body;
+    var p = new PostEntity(post);
+    //p.save();
     indicative.validate(post, {
         id: 'regex:^[0-9a-f]{24}$',
         date: 'regex:^[0-9a-f]{15}$',
@@ -57,10 +57,10 @@ router.post('/', function (req, res) {
         author: 'required|string|min:2',
         text: 'string|min:1',
         tags: 'string|min:1',
-        imgUrl?: 'string',
+        imgUrl: 'string',
         status: 'required|string|in:active,inactive'
     }).then(() => {
-        const collection = db.collection('posts');
+        const collection = mongoose.collection('posts');
         console.log('Inserting post:', post);
         collection.insertOne(post).then((result) => {
             if (result.result.ok && result.insertedCount === 1) {
@@ -81,7 +81,6 @@ router.post('/', function (req, res) {
 
 // PUT (edit) post by id 
 router.put('/:postId', function (req, res) {
-    const db = req.app.locals.db;
     const post = req.body;
     indicative.validate(post, {
         id: 'regex:^[0-9a-f]{24}$',
@@ -90,18 +89,18 @@ router.put('/:postId', function (req, res) {
         author: 'required|string|min:2',
         text: 'string|min:1',
         tags: 'string|min:1',
-        imgUrl?: 'string',
+        imgUrl: 'string',
         status: 'required|string|in:active,inactive'
     }).then(() => {
         if (post.id !== req.params.postId) {
             error(req, res, 400, `Invalid post data - id in url doesn't match: ${post}`);
             return;
         }
-        const collection = db.collection('posts');
-        post._id = new mongodb.ObjectID(post.id);
+        const collection = mongoose.collection('posts');
+        post._id = new mongoose.Schema.ObjectID(post.id);
         delete (post.id);
         console.log('Updating post:', post);
-        collection.updateOne({ _id: new mongodb.ObjectID(post._id) }, { "$set": post })
+        collection.updateOne({ _id: new mongoose.Schema.ObjectID(post._id) }, { "$set": post })
             .then(result => {
                 const resultUser = replaceId(post);
                 if (result.result.ok && result.modifiedCount === 1) {
@@ -119,13 +118,12 @@ router.put('/:postId', function (req, res) {
 
 // DELETE posts list 
 router.delete('/:postId', function (req, res) {
-    const db = req.app.locals.db;
     const params = req.params;
     indicative.validate(params, { postId: 'required|regex:^[0-9a-f]{24}$' })
         .then(() => {
-            db.collection('posts', function (err, all_posts) {
+            mongoose.collection('posts', function (err, all_posts) {
                 if (err) throw err;
-                all_posts.findOneAndDelete({ _id: new mongodb.ObjectID(params.postId) },
+                all_posts.findOneAndDelete({ _id: new mongoose.Schema.ObjectID(params.postId) },
                     (err, result) => {
                         if (err) throw err;
                         if (result.ok) {

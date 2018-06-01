@@ -51,7 +51,6 @@
     "lc-form-validation": "^1.0.0",
     "mongod": "^2.0.0",
     "mongodb": "^3.1.0-beta4",
-    "mongoose": "^5.1.3",
     "morgan": "^1.9.0",
     "node": "^4.9.1",
     "react": "^16.2.0",

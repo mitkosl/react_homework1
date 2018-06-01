@@ -1,10 +1,8 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/postsDB');
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/postsDB";
 
-mongoose.Promise = global.Promise;
-
-mongoose.connection.once('open', () => {
-    console.log("Successfuly connected to postsDB");
-}).on('error', (error) => {
-    console.log("DB connection error: ", error);
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  console.log("Successfuly connected to postsDB");
+  db.close();
 });
